@@ -1,14 +1,8 @@
-# SIH 2026 Project Repository Template
-
-This repository is a **reference template for SIH 2026 teams**. Students can use this structure for their own project repository before submitting the GitHub link.
-
-Replace all sample content with your actual project information.
-
 ## 1. Project Information
 
-- **Project Title:**
+- **Project Title:** Suraksha-Setu : An Automated Flash Flood Simulation, Hydrodynamic Modeling & HADR Decision-Support Platform
 - **PS ID:** 26161
-- **PS Title:** Suraksha-Setu:An Automated Flash Flood Simulation, Hydrodynamic Modeling & HADR Decision-Support Platform
+- **PS Title:** Dam Break Inundation Modelling Using Hydrodynamic Modelling of any River
 - **Category:** Software
 - **Theme:** Disaster Management
 
