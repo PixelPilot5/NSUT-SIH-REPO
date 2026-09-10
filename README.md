@@ -87,43 +87,7 @@ YOUR-SIH-PROJECT/
 └── LICENSE
 ```
 
-### What goes where?
-
-| Item                                   | Location              |
-| -------------------------------------- | --------------------- |
-| Source code (models, processing)       | `src/`                |
-| Dashboard and web interface            | `src/dashboard/`      |
-| Architecture & technical documentation | `docs/`               |
-| Sample DEM and hydrological datasets   | `data/`               |
-| Screenshots & inundation map examples  | `assets/screenshots/` |
-| Unit and integration tests             | `tests/`              |
-| Final PPT / presentation               | `submission/`         |
-| Demo video link                        | `submission/DEMO.md`  |
-| Project overview                       | `README.md`           |
-
-## 8. Final Presentation
-
-Keep your final SIH presentation in the repository whenever the file size allows it.
-
-See [submission/PRESENTATION.md](submission/PRESENTATION.md) for the required format.
-
-If the PPT is too large for GitHub, use Google Drive/OneDrive and put the accessible viewer link in `submission/PRESENTATION.md`.
-
-## 9. Demo Video
-
-A demo video is **optional**, but recommended.
-
-Add the YouTube/Google Drive link in [submission/DEMO.md](submission/DEMO.md).
-
-## 10. Screenshots / Prototype Photos
-
-Add important screenshots or hardware/prototype photos to:
-
-`assets/screenshots/`
-
-See [assets/screenshots/README.md](assets/screenshots/README.md) for examples and naming conventions.
-
-## 11. Installation
+## 8. Installation
 
 ```bash
 git clone <YOUR_REPOSITORY_URL>
@@ -131,7 +95,7 @@ cd <YOUR_PROJECT_FOLDER>
 pip install -r requirements.txt
 ```
 
-## 12. Run
+## 9. Run
 
 ```bash
 uvicorn src.main:app --reload
@@ -139,7 +103,7 @@ uvicorn src.main:app --reload
 
 Replace these commands with the actual setup and run instructions for your project.
 
-## 13. Future Scope
+## 10. Future Scope
 
 - Real-time integration with weather forecasting models
 - Machine learning for rapid scenario prioritization
