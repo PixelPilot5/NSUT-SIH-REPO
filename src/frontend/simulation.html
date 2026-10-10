@@ -1,0 +1,284 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Simulation | Suraksha-Setu</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">≋</div>
+        <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
+      </div>
+      <nav>
+        <a href="index.html" data-p="home"
+          >⌂ <span>Home<small>Overview & Insights</small></span></a
+        ><a href="simulation.html" data-p="simulation"
+          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
+        ><a href="live-monitor.html" data-p="live"
+          >◉
+          <span
+            >Live Flood Monitor<small>Real-time Satellite Data</small></span
+          ></a
+        ><a href="analysis.html" data-p="analysis"
+          >▥
+          <span>Flood Analysis<small>Depth · Velocity · Impact</small></span></a
+        ><a href="reports.html" data-p="reports"
+          >▣
+          <span>Reports & Export<small>Maps · Data · Reports</small></span></a
+        >
+      </nav>
+      <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
+      <button id="theme">☼ Light / ◐ Dark</button>
+    </aside>
+    <main>
+      <section class="content" data-page="simulation">
+        <div class="title">
+          <div>
+            <h1>Simulation</h1>
+            <p>Create a flood scenario and run a hydrodynamic model.</p>
+          </div>
+          <span id="step">Step 1 of 4</span>
+        </div>
+
+        <div class="steps" id="steps">
+          <span class="step-item active">1 Study Area</span>
+          <span class="step-item">2 Scenario</span>
+          <span class="step-item">3 Model</span>
+          <span class="step-item">4 Review & Run</span>
+        </div>
+
+        <div class="sim panel">
+          <!-- STEP 1: STUDY AREA -->
+          <div class="s active" data-s="1">
+            <h2>Select Study Area</h2>
+            <p>Choose the geographical area for your flood simulation.</p>
+
+            <!-- Mode Selection Toggle -->
+            <div class="mb-4">
+              <div class="btn-group" role="group" aria-label="Selection Mode">
+                <button
+                  type="button"
+                  id="btn-mode-preset"
+                  class="btn btn-primary active"
+                >
+                  🌊 Preset Dams (38 Options)
+                </button>
+                <button
+                  type="button"
+                  id="btn-mode-custom"
+                  class="btn btn-outline-primary"
+                >
+                  📍 Custom Coordinates
+                </button>
+              </div>
+            </div>
+
+            <!-- Preset Dams Mode -->
+            <div id="section-preset" class="formgrid study-grid">
+              <label>
+                State / Region
+                <select id="state" class="form-select">
+                  <option value="">Select State...</option>
+                </select>
+              </label>
+
+              <label>
+                District
+                <select id="district" class="form-select" disabled>
+                  <option value="">Select District...</option>
+                </select>
+              </label>
+
+              <label>
+                River
+                <select id="river" class="form-select" disabled>
+                  <option value="">Select River...</option>
+                </select>
+              </label>
+
+              <label>
+                Dam / Lake
+                <select id="dam" class="form-select" disabled>
+                  <option value="">Select Dam/Lake...</option>
+                </select>
+              </label>
+            </div>
+
+            <!-- Custom Coordinates Mode -->
+            <div id="section-custom" class="formgrid study-grid d-none">
+              <label>
+                Latitude (°N)
+                <input
+                  type="number"
+                  id="custom-lat"
+                  class="form-control"
+                  step="any"
+                  placeholder="e.g. 27.120"
+                />
+              </label>
+
+              <label>
+                Longitude (°E)
+                <input
+                  type="number"
+                  id="custom-lng"
+                  class="form-control"
+                  step="any"
+                  placeholder="e.g. 88.480"
+                />
+              </label>
+
+              <label>
+                Location Name / Note (Optional)
+                <input
+                  type="text"
+                  id="custom-name"
+                  class="form-control"
+                  placeholder="e.g. Teesta Bridge Point B"
+                />
+              </label>
+            </div>
+          </div>
+
+          <!-- STEP 2: SCENARIO -->
+          <div class="s" data-s="2">
+            <h2>Choose Flood Scenario</h2>
+            <p>Select the event you want to simulate.</p>
+
+            <div class="scenario-grid">
+              <label class="scenario-card">
+                <input
+                  name="scenario"
+                  type="radio"
+                  value="Full Dam Break"
+                  checked
+                />
+                <span class="scenario-title">Full Dam Break</span>
+                <small
+                  >Entire dam or reservoir barrier fails, causing a large sudden
+                  release of water.</small
+                >
+              </label>
+
+              <label class="scenario-card">
+                <input name="scenario" type="radio" value="Partial Dam Break" />
+                <span class="scenario-title">Partial Dam Break</span>
+                <small
+                  >Only part of the dam fails, causing a smaller release than a
+                  full breach.</small
+                >
+              </label>
+
+              <label class="scenario-card">
+                <input
+                  name="scenario"
+                  type="radio"
+                  value="Slow Water Release"
+                />
+                <span class="scenario-title">Slow Water Release</span>
+                <small
+                  >Water is released gradually rather than through a sudden
+                  catastrophic failure.</small
+                >
+              </label>
+
+              <label class="scenario-card">
+                <input name="scenario" type="radio" value="River Blockage" />
+                <span class="scenario-title">River Blockage</span>
+                <small
+                  >A landslide or debris blockage obstructs the river and causes
+                  water accumulation.</small
+                >
+              </label>
+
+              <label class="scenario-card">
+                <input
+                  name="scenario"
+                  type="radio"
+                  value="Sudden Lake Outburst"
+                />
+                <span class="scenario-title">Sudden Lake Outburst</span>
+                <small
+                  >A natural or temporary lake suddenly releases stored water,
+                  similar to a GLOF-type event.</small
+                >
+              </label>
+
+              <label class="scenario-card">
+                <input
+                  name="scenario"
+                  type="radio"
+                  value="Overtopping Failure"
+                />
+                <span class="scenario-title">Overtopping Failure</span>
+                <small
+                  >Water rises above the dam crest and causes progressive
+                  erosion or failure.</small
+                >
+              </label>
+            </div>
+          </div>
+
+          <!-- STEP 3: MODEL -->
+          <div class="s" data-s="3">
+            <h2>Select Hydrodynamic Model</h2>
+            <p>
+              Choose the model that will be used to generate the flood
+              simulation.
+            </p>
+
+            <div class="choices model-choices">
+              <label>
+                <input name="model" type="radio" value="SPH" checked />
+                <b>SPH</b>
+                <small>Smooth Particle Hydrodynamics.</small>
+              </label>
+              <label>
+                <input name="model" type="radio" value="Delft3D" />
+                <b>Delft3D</b>
+                <small>Hydrodynamic modelling.</small>
+              </label>
+              <label>
+                <input name="model" type="radio" value="Both" />
+                <b>Both Models</b>
+                <small>Run SPH and Delft3D for comparison.</small>
+              </label>
+            </div>
+          </div>
+
+          <!-- STEP 4: REVIEW -->
+          <div class="s" data-s="4">
+            <h2>Review & Run</h2>
+            <p>
+              Check your simulation inputs before sending them to the backend.
+            </p>
+            <div id="review" class="review"></div>
+            <p class="note">
+              This summary is ready to be sent to the backend API.
+            </p>
+          </div>
+
+          <div class="actions">
+            <button id="back" class="btn btn-light" disabled>← Back</button>
+            <button id="next" class="btn btn-primary">Continue →</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/simulation.js"></script>
+  </body>
+</html>

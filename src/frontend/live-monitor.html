@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Live Monitor | Suraksha-Setu</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">≋</div>
+        <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
+      </div>
+      <nav>
+        <a href="index.html" data-p="home"
+          >⌂ <span>Home<small>Overview & Insights</small></span></a
+        >
+        <a href="simulation.html" data-p="simulation"
+          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
+        >
+        <a href="live-monitor.html" data-p="live"
+          >◉<span
+            >Live Flood Monitor<small>Real-time Satellite Data</small></span
+          ></a
+        >
+        <a href="analysis.html" data-p="analysis"
+          >▥<span
+            >Flood Analysis<small>Depth · Velocity · Impact</small></span
+          ></a
+        >
+        <a href="reports.html" data-p="reports"
+          >▣<span>Reports & Export<small>Maps · Data · Reports</small></span></a
+        >
+      </nav>
+      <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
+      <button id="theme">☼ Light / ◐ Dark</button>
+    </aside>
+    <main>
+      <section class="content" data-page="live">
+        <div class="title">
+          <div>
+            <h1>Live Flood Monitor</h1>
+            <p>
+              Monitor observed flood conditions from satellite and open data.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="ph align-items-start">
+            <h3>GEE / Open Data</h3>
+            <div class="text-end">
+              <span
+                class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill fw-semibold"
+              >
+                ● Active Sentinel-1 SAR Stream
+              </span>
+              <div class="text-muted mt-2">
+                Data Source: Copernicus Sentinel-1 GRD / GEE Change Detection
+              </div>
+            </div>
+          </div>
+
+          <!-- Preset Basin Selector Row -->
+          <div class="row align-items-end mb-3 p-3">
+            <div class="col-12">
+              <label for="damSelect" class="form-label fw-bold"
+                >Select Preset Dam / Basin:</label
+              >
+              <select id="damSelect" class="form-select">
+                <option value="">Loading locations...</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- GEE Map Iframe wrapped in clipping container -->
+          <div class="gee-container mx-3 mb-3">
+            <iframe
+              id="geeIframe"
+              src="https://gee-live-flood-monitoring.projects.earthengine.app/view/suraksha-setu-live-monitor"
+            >
+            </iframe>
+          </div>
+
+          <!-- Map Legend placed outside the map, in the bottom-right of the white panel box -->
+          <div class="d-flex justify-content-end px-3 pb-2">
+            <div class="map-legend">
+              <div class="legend-item">
+                <span class="legend-color red"></span> Severe Flooding
+              </div>
+              <div class="legend-item">
+                <span class="legend-color yellow"></span> Warning Zone
+              </div>
+              <div class="legend-item">
+                <span class="legend-color green"></span> Baseline Water 
+              </div>
+              <div class="legend-item">
+                <span class="legend-color blue-dot"></span> Dam Location
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Key Impact Parameters Dashboard Grid -->
+        <div class="panel mb-4">
+          <div class="ph">
+            <h3>Real-Time Basin Impact Metrics</h3>
+          </div>
+          <div class="row g-3 p-3">
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >🌊 Severe Inundation Area</small
+                >
+                <div class="metric-val" id="metricInundation">-</div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >👥 Exposed Population Estimate</small
+                >
+                <div class="metric-val" id="metricPopulation">-</div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >🌾 Submerged Cropland</small
+                >
+                <div class="metric-val" id="metricCropland">-</div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >🛣️ Submerged Road Network</small
+                >
+                <div class="metric-val" id="metricRoads">-</div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >💰 Est. Agricultural Loss</small
+                >
+                <div class="metric-val" id="metricLoss">-</div>
+              </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+              <div class="metric-card">
+                <small class="text-muted fw-semibold"
+                  >🏥 Critical Infrastructure at Risk</small
+                >
+                <div class="metric-val" id="metricInfra">-</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/live.js"></script>
+  </body>
+</html>

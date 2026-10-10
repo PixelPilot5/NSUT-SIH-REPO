@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "flood_extent",
+        "flood_type": "inundation"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              77.4,
+              27.4
+            ],
+            [
+              77.6,
+              27.4
+            ],
+            [
+              77.6,
+              27.6
+            ],
+            [
+              77.4,
+              27.6
+            ],
+            [
+              77.4,
+              27.4
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

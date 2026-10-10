@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Results | Suraksha-Setu</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo">≋</div>
+        <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
+      </div>
+      <nav>
+        <a href="index.html" data-p="home"
+          >⌂ <span>Home<small>Overview & Insights</small></span></a
+        ><a href="simulation.html" data-p="simulation"
+          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
+        ><a href="live-monitor.html" data-p="live"
+          >◉
+          <span
+            >Live Flood Monitor<small>Real-time Satellite Data</small></span
+          ></a
+        ><a href="analysis.html" data-p="analysis"
+          >▥
+          <span>Flood Analysis<small>Depth · Velocity · Impact</small></span></a
+        ><a href="reports.html" data-p="reports"
+          >▣
+          <span>Reports & Export<small>Maps · Data · Reports</small></span></a
+        >
+      </nav>
+      <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
+      <button id="theme">☼ Light / ◐ Dark</button>
+    </aside>
+    <main>
+      <section class="content" data-page="results">
+        <div class="title">
+          <div>
+            <h1>Flood Simulation Results</h1>
+            <p id="simulationInfo">Loading simulation...</p>
+          </div>
+          <a class="btn btn-primary" href="analysis.html"
+            >View Impact Analysis →</a
+          >
+        </div>
+        <div class="resultgrid">
+          <div class="panel">
+            <div class="ph">
+              <h3>Flood Extent Map</h3>
+              <span>Flood Extent · Depth · Velocity · Arrival Time</span>
+            </div>
+            <div id="resultMap" class="map bigmap"></div>
+            <div class="time">
+              <b>Simulation Time</b
+              ><input id="slider" type="range" min="0" max="6" value="2" /><span
+                id="tv"
+                >2 hr</span
+              >
+            </div>
+          </div>
+          <div class="panel">
+            <h3>Key Results</h3>
+            <p>Maximum Depth <b>8.4 m</b></p>
+            <p>Peak Velocity <b>6.2 m/s</b></p>
+            <p>Flooded Area <b>128.4 km²</b></p>
+            <p>Arrival Time <b>2.8 hr</b></p>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/results.js"></script>
+  </body>
+</html>
