@@ -1,0 +1,420 @@
+/* Flood Impact Analysis page (analysis.html). Everything is prefixed "an-" so it cannot clash with style.css */
+.an {
+  --an-line: #e3edf8;
+  --an-muted: #5b7595;
+  --an-soft: #f2f8ff;
+  --an-accent: #1687ee;
+}
+body.dark .an {
+  --an-line: #2b405a;
+  --an-muted: #9db6d4;
+  --an-soft: #1b2d44;
+}
+
+/* page title row: same size and style as "Flood Simulation Results"; buttons sit top right */
+.an-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.an-title h1 {
+  font-size: 30px;
+  margin: 0 0 5px;
+}
+.an-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* dam card */
+.an-head {
+  padding: 18px 22px;
+}
+.an-head h2 {
+  font-size: 24px;
+  margin: 0 0 2px;
+  line-height: 1.2;
+}
+.an-sub {
+  color: var(--an-muted);
+  font-size: 14px;
+}
+.an-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.an-pill {
+  display: inline-flex;
+  padding: 4px 12px;
+  border-radius: 99px;
+  background: var(--an-soft);
+  border: 1px solid var(--an-line);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* scenario strip (top, horizontal) */
+.an-strip {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+  margin-top: 14px;
+}
+.an-strip-title {
+  flex: 0 0 210px;
+  padding: 14px 18px;
+  background: var(--an-soft);
+  border-right: 1px solid var(--an-line);
+}
+.an-strip-title span {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--an-accent);
+}
+.an-strip-title b {
+  display: block;
+  font-size: 17px;
+  margin-top: 2px;
+}
+.an-strip-title small {
+  display: block;
+  font-size: 12px;
+  color: var(--an-muted);
+  margin-top: 4px;
+  line-height: 1.35;
+}
+.an-strip-items {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+}
+.an-strip-item {
+  padding: 14px 16px;
+  border-right: 1px solid var(--an-line);
+  min-width: 0;
+}
+.an-strip-item:last-child {
+  border-right: 0;
+}
+.an-strip-item span {
+  display: block;
+  font-size: 11.5px;
+  color: var(--an-muted);
+}
+.an-strip-item b {
+  display: block;
+  font-size: 19px;
+  line-height: 1.25;
+  margin-top: 4px;
+}
+.an-strip-item b em {
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--an-muted);
+  margin-left: 3px;
+}
+.an-strip-item small {
+  display: block;
+  font-size: 11.5px;
+  color: var(--an-muted);
+  margin-top: 1px;
+}
+
+/* section headings */
+.an-h {
+  font-size: 17px;
+  margin: 22px 2px 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+.an-h small {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--an-muted);
+}
+
+/* KPI cards */
+.an-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+.an-kpi {
+  background: #fff;
+  border: 1px solid var(--an-line);
+  border-radius: 14px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+body.dark .an-kpi {
+  background: #17263a;
+}
+.an-kpi span {
+  display: block;
+  font-size: 12px;
+  color: var(--an-muted);
+}
+.an-kpi b {
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 6px 0 2px;
+}
+.an-kpi b em {
+  font-style: normal;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--an-muted);
+  margin-left: 3px;
+}
+.an-kpi small {
+  display: block;
+  font-size: 12px;
+  color: var(--an-muted);
+}
+.an-kpi.hot {
+  border-left: 4px solid #d9480f;
+}
+.an-kpi.warn {
+  border-left: 4px solid #e8a317;
+}
+.an-kpis3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.an-note {
+  font-size: 12px;
+  color: var(--an-muted);
+  margin: 8px 2px 0;
+  line-height: 1.45;
+}
+
+/* two-column rows */
+.an-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 14px;
+}
+.an-grid2 > .panel {
+  margin-bottom: 0;
+}
+.an-grid2 > .panel:empty {
+  display: none;
+}
+.an-wide {
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+.an-wide:empty {
+  display: none;
+}
+.an .panel h3 {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+.an-sub2 {
+  font-size: 12.5px;
+  color: var(--an-muted);
+  margin: 0 0 10px;
+}
+
+/* depth-class table with share bars */
+.an-bar {
+  position: relative;
+  height: 8px;
+  border-radius: 99px;
+  background: var(--an-soft);
+  overflow: hidden;
+  min-width: 70px;
+}
+.an-bar i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 99px;
+}
+.an-c-low {
+  background: #7cc4f5;
+}
+.an-c-moderate {
+  background: #2f80d8;
+}
+.an-c-high {
+  background: #0b2f7a;
+}
+.an-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+
+/* arrival timeline */
+.an-tl {
+  display: grid;
+  gap: 10px;
+}
+.an-tl-row {
+  display: grid;
+  grid-template-columns: 150px 1fr 82px;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.an-tl-name {
+  min-width: 0;
+}
+.an-tl-name b {
+  display: block;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.an-tl-name small {
+  color: var(--an-muted);
+  font-size: 11.5px;
+}
+.an-tl-track {
+  height: 10px;
+  background: var(--an-soft);
+  border-radius: 99px;
+  position: relative;
+}
+.an-tl-track i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7cc4f5, #1687ee);
+}
+.an-tl-time {
+  text-align: right;
+  font-weight: 700;
+}
+.an-tl-time small {
+  display: block;
+  font-weight: 400;
+  color: var(--an-muted);
+  font-size: 11.5px;
+}
+
+/* tables and key/value rows reuse style.css classes: .stn, .kv, .src-note, .badge-conf */
+.an table.stn {
+  margin-top: 4px;
+}
+.an .kv {
+  font-size: 13.5px;
+}
+.an-hydro svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.an-hydro text {
+  font-size: 11px;
+  fill: #496080;
+}
+body.dark .an-hydro text {
+  fill: #9db6d4;
+}
+
+/* comparison: metrics run across the page */
+.an-cmp {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+.an-cmp th,
+.an-cmp td {
+  padding: 9px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--an-line);
+}
+.an-cmp thead th {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--an-muted);
+}
+.an-cmp th:first-child,
+.an-cmp td:first-child {
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.an-cmp tbody tr:last-child td {
+  border-bottom: 0;
+}
+.an-cmp .diff td {
+  color: var(--an-muted);
+  font-weight: 400;
+}
+.an-cmp-scroll {
+  overflow-x: auto;
+}
+
+/* footer: data, method, caution */
+.an-foot {
+  margin: 22px 2px 6px;
+  padding-top: 14px;
+  border-top: 1px solid var(--an-line);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--an-muted);
+}
+.an-foot b {
+  color: inherit;
+  font-weight: 700;
+}
+.an-foot p {
+  margin: 0 0 6px;
+}
+.an-foot .badge-conf {
+  font-size: 11px;
+}
+
+@media (max-width: 1100px) {
+  .an-strip {
+    flex-direction: column;
+  }
+  .an-strip-title {
+    flex: none;
+    border-right: 0;
+    border-bottom: 1px solid var(--an-line);
+  }
+  .an-kpis,
+  .an-kpis3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .an-grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .an-kpis,
+  .an-kpis3 {
+    grid-template-columns: 1fr;
+  }
+  .an-tl-row {
+    grid-template-columns: 110px 1fr 70px;
+  }
+}

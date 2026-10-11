@@ -21,22 +21,15 @@
         <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
       </div>
       <nav>
-        <a href="index.html" data-p="home"
-          >⌂ <span>Home<small>Overview & Insights</small></span></a
-        ><a href="simulation.html" data-p="simulation"
-          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
-        ><a href="live-monitor.html" data-p="live"
-          >◉
-          <span
-            >Live Flood Monitor<small>Real-time Satellite Data</small></span
-          ></a
-        ><a href="analysis.html" data-p="analysis"
-          >▥
-          <span>Flood Analysis<small>Depth · Velocity · Impact</small></span></a
-        ><a href="reports.html" data-p="reports"
-          >▣
-          <span>Reports & Export<small>Maps · Data · Reports</small></span></a
-        >
+        <a href="index.html" data-p="home">
+          ⌂ <span>Home<small>Overview & Insights</small></span>
+        </a>
+        <a href="simulation.html" data-p="simulation">
+          ≋ <span>Simulation<small>Regions · Rivers · Dams</small></span>
+        </a>
+        <a href="live-monitor.html" data-p="live">
+          ◉ <span>Live Flood Monitor<small>Real-time Satellite Data</small></span>
+        </a>
       </nav>
       <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
       <button id="theme">☼ Light / ◐ Dark</button>
@@ -255,18 +248,21 @@
                 <small>Run SPH and Delft3D for comparison.</small>
               </label>
             </div>
+            <div class="mt-3" style="max-width: 360px">
+              <label for="quality" class="form-label"><b>Simulation detail</b></label>
+              <select id="quality" class="form-select">
+                <option value="fast">Fast (1,200 SPH particles)</option>
+                <option value="standard" selected>Standard (2,200 SPH particles)</option>
+                <option value="high">High (4,000 SPH particles, slower)</option>
+              </select>
+              <small class="text-muted">Real solvers run on the server; first run takes about 30-90 s, repeat runs are cached.</small>
+            </div>
           </div>
 
           <!-- STEP 4: REVIEW -->
           <div class="s" data-s="4">
             <h2>Review & Run</h2>
-            <p>
-              Check your simulation inputs before sending them to the backend.
-            </p>
             <div id="review" class="review"></div>
-            <p class="note">
-              This summary is ready to be sent to the backend API.
-            </p>
           </div>
 
           <div class="actions">

@@ -1,15 +1,41 @@
-from fastapi import FastAPI, Depends, Query
+from typing import Optional, Dict, Any
+from fastapi import FastAPI, Depends, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-# from models import Simulation
-# from database import session, engine
-# import database_models
-# pyrefly: ignore [missing-import]
-import ee
+from pydantic import BaseModel
+
+import numpy as np
+
+import jobs
+import solvers
+from dam_data import DAMS, SCENARIOS, resolve_dam
+from solvers import run_sph_simulation, run_delft3d_simulation
+
+
+class SimulationRequest(BaseModel):
+    dam_name: Optional[str] = None
+    dam_id: Optional[str] = None                 # e.g. "tehri" (preferred; the frontend DAM_PRESETS id)
+    scenario: str = "Full Dam Break"
+    model_type: str = "SPH"                      # "SPH" | "Delft3D" | "Both"
+    quality: str = "standard"                    # "fast" | "standard" | "high"  (SPH particle budget)
+    # Legacy fields. The old frontend always sent 50 MCM / 120 m, which would overwrite the real
+    # reservoir data, so they are ONLY honoured when override_physical is true.
+    discharge_volume: Optional[float] = None     # MCM
+    breach_width: Optional[float] = None         # m
+    override_physical: bool = False
+    custom: Optional[Dict[str, Any]] = None      # custom point: lat, lng, name, height_m, storage_mcm, terrain, ...
+
+
+try:
+    import ee
+except ImportError:                              # Earth Engine is optional for the simulation endpoints
+    ee = None
 
 # ---------------------------------------------------------
 # INITIALIZE GOOGLE EARTH ENGINE SDK
 # ---------------------------------------------------------
 try:
+    if ee is None:
+        raise RuntimeError("earthengine-api is not installed")
     ee.Initialize(project='gee-live-flood-monitoring')
     print("Google Earth Engine initialized successfully.")
 except Exception as e:
@@ -31,100 +57,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-
-# database_models.Base.metadata.create_all(bind=engine)
-
-
-# @app.get("/")
-# def home():
-#     return {
-#         "message": "Welcome to FloodSim API!"
-#     }
-
-
-# # Create a database session and provide it to whoever needs one
-# def get_db():
-#     db = session()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
-
-
-# @app.get("/simulations")
-# def get_all_simulations(db=Depends(get_db)):
-
-#     simulations = db.query(
-#         database_models.Simulations
-#     ).all()
-
-#     return simulations
-
-
-# @app.get("/simulations/{id}")
-# def get_simulation_by_id(
-#     id: int,
-#     db=Depends(get_db)
-# ):
-
-#     simulation = db.query(
-#         database_models.Simulations
-#     ).filter(
-#         database_models.Simulations.id == id
-#     ).first()
-
-#     if simulation:
-#         return simulation
-
-#     return "simulation not found"
-
-
-# @app.post("/simulations")
-# def add_simulation(
-#     simulation: Simulation,
-#     db=Depends(get_db)
-# ):
-
-#     db_simulation = database_models.Simulations(
-#         name=simulation.name,
-#         state=simulation.state,
-#         district=simulation.district,
-#         river=simulation.river,
-#         dam=simulation.dam,
-#         scenario=simulation.scenario,
-#         model=simulation.model
-#     )
-
-#     db.add(db_simulation)
-#     db.commit()
-#     db.refresh(db_simulation)
-
-#     return db_simulation
-
-
-# @app.delete("/simulations/{id}")
-# def delete_simulation(
-#     id: int,
-#     db=Depends(get_db)
-# ):
-
-#     simulation = db.query(
-#         database_models.Simulations
-#     ).filter(
-#         database_models.Simulations.id == id
-#     ).first()
-
-#     if not simulation:
-#         return "simulation not found"
-
-#     db.delete(simulation)
-#     db.commit()
-
-#     return {
-#         "message": "Simulation deleted successfully"
-#     }
-
 
 # ---------------------------------------------------------
 # CATCHMENT BASINS & DAM LOCATIONS (38 INDIAN BASINS)
@@ -336,3 +268,98 @@ def compute_live_gee_metrics(
             "critical_infrastructure": f"{infra:,} Structures"
         }
     }
+
+# ---------------------------------------------------------
+# DAM CATALOGUE + LOCATION (real parameters live in dam_data.py)
+# ---------------------------------------------------------
+def _flow_bearing(valley):
+    """compass bearing (deg) of the river over the first ~10 km below the dam"""
+    k = max(2, int(10000 / valley.ds))
+    de, dn = valley.ce[k] - valley.ce[0], valley.cn[k] - valley.cn[0]
+    return float((np.degrees(np.arctan2(de, dn)) + 360.0) % 360.0)
+
+
+@app.get("/api/dams")
+def list_dams():
+    """Dams with real engineering parameters, source and data-confidence flag."""
+    return [dict(id=k, name=d["name"], key=d["key"], lat=d["lat"], lng=d["lng"], river=d["river"], kind=d["kind"],
+                 height_m=d["H"], crest_m=d["L"], storage_mcm=d["Vg"], data_confidence=d["conf"], source=d["src"],
+                 has_flow_path=bool(d.get("path")), reference_event=("event" in d)) for k, d in DAMS.items()]
+
+
+@app.get("/api/scenarios")
+def list_scenarios():
+    return SCENARIOS
+
+
+@app.get("/api/dam-location")
+def get_dam_location(dam_name: str = Query(None), dam_id: str = Query(None)):
+    did, dam = resolve_dam(dam_id, dam_name)
+    if dam is None:
+        return {"found": False}
+    case = solvers.prepare_case(did, None, "Full Dam Break")        # cheap: terrain + hydrograph only
+    v = case["valley"]
+    cl, _ = v.centerline_latlng(step_cells=3)
+    return {"found": True, "id": did, "name": dam["name"], "center": [dam["lat"], dam["lng"]], "zoom": 10,
+            "flow_bearing": _flow_bearing(v), "flow_path": [[float(a), float(b)] for a, b in cl],
+            "path_source": v.path_source, "data_confidence": dam["conf"]}
+
+
+# ---------------------------------------------------------
+# SIMULATION API
+# ---------------------------------------------------------
+def _params(p: SimulationRequest):
+    ov = {}
+    if p.override_physical:
+        if p.discharge_volume:
+            ov["volume_mcm"] = float(p.discharge_volume)
+        if p.breach_width:
+            ov["breach_width"] = float(p.breach_width)
+    return dict(dam_id=p.dam_id, dam_name=p.dam_name, scenario=p.scenario, model=p.model_type,
+                quality=p.quality, custom=p.custom, overrides=ov)
+
+
+@app.post("/api/jobs")
+def start_simulation_job(payload: SimulationRequest):
+    """Start a run and return immediately. Poll /api/jobs/{id}, then fetch /api/jobs/{id}/result."""
+    prm = _params(payload)
+    if not prm["custom"] and resolve_dam(prm["dam_id"], prm["dam_name"])[1] is None:
+        raise HTTPException(404, "Unknown dam. See /api/dams for the catalogue.")
+    return {"job_id": jobs.start_job(prm)}
+
+
+@app.get("/api/jobs/{job_id}")
+def job_status(job_id: str):
+    st = jobs.get_status(job_id)
+    if st is None:
+        raise HTTPException(404, "Unknown job id")
+    return st
+
+
+@app.get("/api/jobs/{job_id}/result")
+def job_result(job_id: str):
+    st = jobs.get_status(job_id)
+    if st is None:
+        raise HTTPException(404, "Unknown job id")
+    if st["state"] == "error":
+        raise HTTPException(500, st["error"])
+    if st["state"] != "done":
+        raise HTTPException(409, "Job not finished (state=%s)" % st["state"])
+    return jobs.get_result(job_id)
+
+
+@app.post("/api/simulate-model")
+def trigger_hydrodynamic_simulation(payload: SimulationRequest):
+    """Blocking variant (kept for compatibility / scripts). Prefer /api/jobs for the UI."""
+    prm = _params(payload)
+    m = (payload.model_type or "SPH").upper()
+    try:
+        case = solvers.prepare_case(prm["dam_id"], prm["dam_name"], prm["scenario"], prm["custom"], prm["overrides"])
+    except KeyError as exc:
+        raise HTTPException(404, str(exc))
+    kw = dict(scenario=case["scenario"], quality=prm["quality"], overrides=prm["overrides"], _case=case)
+    if "SPH" in m:
+        return run_sph_simulation(**kw)
+    if "DELFT" in m or "DFLT" in m:
+        return run_delft3d_simulation(**kw)
+    return {"comparison": True, "sph": run_sph_simulation(**kw), "delft3d": run_delft3d_simulation(**kw)}

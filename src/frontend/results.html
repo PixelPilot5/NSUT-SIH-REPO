@@ -21,22 +21,15 @@
         <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
       </div>
       <nav>
-        <a href="index.html" data-p="home"
-          >⌂ <span>Home<small>Overview & Insights</small></span></a
-        ><a href="simulation.html" data-p="simulation"
-          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
-        ><a href="live-monitor.html" data-p="live"
-          >◉
-          <span
-            >Live Flood Monitor<small>Real-time Satellite Data</small></span
-          ></a
-        ><a href="analysis.html" data-p="analysis"
-          >▥
-          <span>Flood Analysis<small>Depth · Velocity · Impact</small></span></a
-        ><a href="reports.html" data-p="reports"
-          >▣
-          <span>Reports & Export<small>Maps · Data · Reports</small></span></a
-        >
+        <a href="index.html" data-p="home">
+          ⌂ <span>Home<small>Overview & Insights</small></span>
+        </a>
+        <a href="simulation.html" data-p="simulation">
+          ≋ <span>Simulation<small>Regions · Rivers · Dams</small></span>
+        </a>
+        <a href="live-monitor.html" data-p="live">
+          ◉ <span>Live Flood Monitor<small>Real-time Satellite Data</small></span>
+        </a>
       </nav>
       <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
       <button id="theme">☼ Light / ◐ Dark</button>
@@ -54,25 +47,58 @@
         </div>
         <div class="resultgrid">
           <div class="panel">
-            <div class="ph">
-              <h3>Flood Extent Map</h3>
-              <span>Flood Extent · Depth · Velocity · Arrival Time</span>
+            <div class="ph rs-head">
+              <h3 id="mapTitle">Flood Extent Map</h3>
+              <div class="rs-controls">
+                <div class="btn-group btn-group-sm d-none" id="modelTabs" role="group" aria-label="Model">
+                  <button type="button" class="btn btn-outline-primary" data-model="sph">SPH</button>
+                  <button type="button" class="btn btn-outline-primary" data-model="delft3d">Delft3D</button>
+                </div>
+                <div class="btn-group btn-group-sm" id="viewTabs" role="group" aria-label="View">
+                  <button type="button" class="btn btn-primary" data-view="map">Map</button>
+                  <button type="button" class="btn btn-outline-primary" data-view="3d">3D</button>
+                </div>
+              </div>
             </div>
-            <div id="resultMap" class="map bigmap"></div>
+            <div class="viewwrap">
+              <div id="resultMap" class="map bigmap"></div>
+              <canvas id="view3d" class="view3d d-none"></canvas>
+              <div id="loadOverlay" class="load-overlay">
+                <div class="load-card">
+                  <b id="loadTitle">Running hydrodynamic solver…</b>
+                  <div class="progress my-2"><div id="loadBar" class="progress-bar" style="width: 3%"></div></div>
+                  <small id="loadMsg">Starting…</small>
+                  <div id="loadErr" class="mt-2"></div>
+                </div>
+              </div>
+              <div id="legendBox" class="legend-box"></div>
+            </div>
             <div class="time">
               <b>Simulation Time</b
-              ><input id="slider" type="range" min="0" max="6" value="2" /><span
+              ><input id="slider" type="range" min="0" max="6" value="0" step="0.01" /><span
                 id="tv"
-                >2 hr</span
+                >0 hr</span
               >
             </div>
+            <div class="viewopts">
+              <label class="vo"><input type="checkbox" id="followChk" checked /> Follow flood front</label>
+              <label class="vo">Playback
+                <select id="speedSel" class="form-select form-select-sm">
+                  <option value="40">Slow</option>
+                  <option value="20" selected>Normal</option>
+                  <option value="10">Fast</option>
+                </select>
+              </label>
+              <label class="vo d-none" id="veWrap">Vertical exaggeration
+                <input type="range" id="veRange" min="1" max="40" step="0.5" value="8" />
+                <span id="veVal">×8</span>
+              </label>
+              <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="resetView">Reset 3D view</button>
+            </div>
           </div>
-          <div class="panel">
+          <div class="panel" id="sidePanel">
             <h3>Key Results</h3>
-            <p>Maximum Depth <b>8.4 m</b></p>
-            <p>Peak Velocity <b>6.2 m/s</b></p>
-            <p>Flooded Area <b>128.4 km²</b></p>
-            <p>Arrival Time <b>2.8 hr</b></p>
+            <p class="text-muted">Waiting for the solver…</p>
           </div>
         </div>
       </section>
@@ -80,6 +106,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/flood-render.js"></script>
     <script src="js/results.js"></script>
   </body>
 </html>

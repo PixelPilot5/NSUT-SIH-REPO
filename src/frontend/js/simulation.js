@@ -1,5 +1,3 @@
-// FloodSim-Frontend/js/simulation.js
-
 let currentStep = 1;
 const totalSteps = 4;
 let activeMode = "preset"; // "preset" | "custom"
@@ -98,7 +96,7 @@ const DAM_PRESETS = [
     district: "Mangan",
     river: "Teesta",
     dam: "Teesta III Dam",
-    point: [88.48, 27.12],
+    point: [88.644, 27.598], // Chungthang (was 88.48, 27.12, ~56 km downstream)
     bbox: [88.3, 26.45, 88.85, 27.18],
   },
   {
@@ -364,6 +362,11 @@ function getSelectedScenario() {
   return selected ? selected.value : "Full Dam Break";
 }
 
+function getSelectedQuality() {
+  const el = document.getElementById("quality");
+  return el ? el.value : "standard";
+}
+
 function getSelectedModel() {
   const selected = document.querySelector("[name='model']:checked");
   return selected ? selected.value : "SPH";
@@ -386,6 +389,8 @@ function collectSimulationData() {
         district: selectedDam.district,
         river: selectedDam.river,
         dam: selectedDam.dam,
+        dam_id: selectedDam.id, // key used by the backend (backend/dam_data.py)
+        quality: getSelectedQuality(),
         coordinates: selectedDam.point, // [lng, lat]
         bbox: selectedDam.bbox,
         scenario: scenario,
@@ -407,6 +412,7 @@ function collectSimulationData() {
       district: "Custom District",
       river: "Custom Waterway",
       dam: customName,
+      quality: getSelectedQuality(),
       coordinates: [lng, lat],
       bbox: [lng - delta, lat - delta, lng + delta, lat + delta],
       scenario: scenario,
@@ -612,6 +618,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   populateStates();
+
+  // If the URL has ?dam=<id> (e.g. from the Home page map), preselect that dam
+  // by walking the cascading dropdowns: state > district > river > dam.
+  const preId = new URLSearchParams(window.location.search).get("dam");
+  const pre = DAM_PRESETS.find((d) => d.id === preId);
+  if (pre) {
+    stateSelect.value = pre.state;
+    stateSelect.dispatchEvent(new Event("change")); // fills the district list
+    districtSelect.value = pre.district;
+    districtSelect.dispatchEvent(new Event("change")); // fills the river list
+    riverSelect.value = pre.river;
+    riverSelect.dispatchEvent(new Event("change")); // fills the dam list
+    damSelect.value = pre.id;
+  }
 
   // Navigation Buttons
   document.getElementById("next").addEventListener("click", () => {

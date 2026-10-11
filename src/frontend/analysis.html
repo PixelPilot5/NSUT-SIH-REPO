@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Analysis | Suraksha-Setu</title>
+    <title>Impact Analysis | Suraksha-Setu</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -13,6 +13,7 @@
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
     />
     <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/analysis.css" />
   </head>
   <body>
     <aside class="sidebar">
@@ -21,78 +22,104 @@
         <div><b>Suraksha-Setu</b><small>Smart Flood Intelligence</small></div>
       </div>
       <nav>
-        <a href="index.html" data-p="home"
-          >⌂ <span>Home<small>Overview & Insights</small></span></a
-        ><a href="simulation.html" data-p="simulation"
-          >≋ <span>Simulation<small>Regions · Rivers · Dams</small></span></a
-        ><a href="live-monitor.html" data-p="live"
-          >◉
-          <span
-            >Live Flood Monitor<small>Real-time Satellite Data</small></span
-          ></a
-        ><a href="analysis.html" data-p="analysis"
-          >▥
-          <span>Flood Analysis<small>Depth · Velocity · Impact</small></span></a
-        ><a href="reports.html" data-p="reports"
-          >▣
-          <span>Reports & Export<small>Maps · Data · Reports</small></span></a
-        >
+        <a href="index.html" data-p="home">
+          ⌂ <span>Home<small>Overview & Insights</small></span>
+        </a>
+        <a href="simulation.html" data-p="simulation">
+          ≋ <span>Simulation<small>Regions · Rivers · Dams</small></span>
+        </a>
+        <a href="live-monitor.html" data-p="live">
+          ◉
+          <span>Live Flood Monitor<small>Real-time Satellite Data</small></span>
+        </a>
       </nav>
       <div class="motto">Safer Communities<br />Stronger Tomorrow</div>
       <button id="theme">☼ Light / ◐ Dark</button>
     </aside>
     <main>
-      <section class="content" data-page="analysis">
-        <div class="title">
-          <div>
-            <h1>Flood Analysis</h1>
-            <p>Understand flood depth, velocity and potential impact.</p>
+      <section class="content an" data-page="analysis">
+        <!-- 1. page title (left) and buttons (top right) -->
+        <div class="an-title">
+          <h1>Flood Impact Analysis</h1>
+          <div class="an-actions">
+            <div
+              class="btn-group btn-group-sm d-none"
+              id="anModelTabs"
+              role="group"
+              aria-label="Model"
+            >
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-model="sph"
+              >
+                SPH
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                data-model="delft3d"
+              >
+                Delft3D
+              </button>
+            </div>
+            <a class="btn btn-outline-primary" href="results.html"
+              >&larr; Back to simulation</a
+            >
+            <a class="btn btn-primary" href="reports.html">Generate report</a>
           </div>
-          <a class="btn btn-outline-primary" href="reports.html"
-            >Generate Report</a
-          >
         </div>
-        <div class="impact">
-          <div>
-            <span>Flooded Area</span><b>128.4 km²</b
-            ><small>Simulation output</small>
-          </div>
-          <div>
-            <span>Population at Risk</span><b>24,580</b
-            ><small>Potentially affected</small>
-          </div>
-          <div>
-            <span>Buildings</span><b>3,240</b
-            ><small>Within affected area</small>
-          </div>
-          <div>
-            <span>Roads</span><b>87 km</b><small>Potentially affected</small>
-          </div>
-          <div>
-            <span>Bridges</span><b>12</b><small>Potentially affected</small>
-          </div>
-          <div>
-            <span>Schools</span><b>18</b><small>Potentially affected</small>
-          </div>
+
+        <!-- 2. which dam -->
+        <div class="panel an-head">
+          <h2 id="anDam">Loading…</h2>
+          <div class="an-sub" id="anSub"></div>
+          <div class="an-pills" id="anPills"></div>
         </div>
-        <div class="analysisgrid">
-          <div class="panel">
-            <h3>Water Depth Over Time</h3>
-            <div class="bars">▂ ▄ ▇ █ ▆ ▃ ▂</div>
+
+        <div id="anEmpty" class="panel d-none">
+          <b>No simulation results yet.</b>
+          <p class="mb-0">
+            Run a simulation first, then come back here.
+            <a href="simulation.html">Go to Simulation →</a>
+          </p>
+        </div>
+
+        <div id="anBody">
+          <!-- 3. scenario strip -->
+          <div class="panel an-strip" id="anScenario"></div>
+
+          <!-- 4. hazard -->
+          <h2 class="an-h">Flood hazard <small>what the water does</small></h2>
+          <div class="an-kpis an-kpis3" id="anHazard"></div>
+
+          <!-- 5. exposure -->
+          <h2 class="an-h">
+            Exposure <small>who and what is in the flood zone</small>
+          </h2>
+          <div class="an-kpis an-kpis3" id="anExposure"></div>
+
+          <!-- breakdown + timing -->
+          <div class="an-grid2">
+            <div class="panel" id="anClasses"></div>
+            <div class="panel" id="anTimeline"></div>
           </div>
-          <div class="panel">
-            <h3>Risk Summary</h3>
-            <p>🔴 High Risk Zone — 31.2 km²</p>
-            <p>🟠 Moderate Risk — 54.6 km²</p>
-            <p>🟡 Low Risk — 42.6 km²</p>
-          </div>
+
+          <!-- 6. dam outflow hydrograph -->
+          <div class="panel an-wide" id="anHydro"></div>
+
+          <!-- 7. model comparison (full width) -->
+          <div class="panel an-wide" id="anCompare"></div>
+
+          <!-- 8. data, method and caution footer -->
+          <footer class="an-foot" id="anFoot"></footer>
         </div>
       </section>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/exposure.js"></script>
     <script src="js/analysis.js"></script>
   </body>
 </html>
-

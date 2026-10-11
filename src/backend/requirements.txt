@@ -1,3 +1,6 @@
 fastapi
 uvicorn[standard]
+numpy
+scipy
 earthengine-api
+# optional: rasterio  (only needed if you drop real DEM GeoTIFFs into backend/dem/<dam_id>.tif)

@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -17,6 +17,340 @@
     />
 
     <link rel="stylesheet" href="css/style.css" />
+
+    <!-- Home-page-only styles. Every class starts with "hp-" so nothing here
+         can clash with style.css or the other pages. -->
+    <style>
+      .hp {
+        --muted: #6680a7;
+        --line: #edf2f7;
+        --accent: #1687ee;
+      }
+      body.dark .hp {
+        --muted: #9bb0cc;
+        --line: #2b405a;
+      }
+
+      /* ---------- Welcome row ---------- */
+      .hp .welcome {
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+      .hp-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .hp-btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 11px 18px;
+        border-radius: 12px;
+        border: 1px solid var(--accent);
+        font-size: 14px;
+        font-weight: bold;
+        text-decoration: none;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .hp-btn.primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .hp-btn.primary:hover {
+        background: #0f6fc9;
+        border-color: #0f6fc9;
+      }
+      .hp-btn.ghost {
+        background: #fff;
+        color: var(--accent);
+      }
+      .hp-btn.ghost:hover {
+        background: #edf6ff;
+      }
+      body.dark .hp-btn.ghost {
+        background: #17263a;
+      }
+      body.dark .hp-btn.ghost:hover {
+        background: #20344b;
+      }
+
+      /* ---------- Facts strip ---------- */
+      .hp-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        padding: 0;
+        margin: 20px 0 14px;
+        overflow: hidden;
+      }
+      .hp-stat {
+        padding: 16px 20px;
+        border-left: 1px solid var(--line);
+      }
+      .hp-stat:first-child {
+        border-left: 0;
+      }
+      .hp-stat b {
+        display: block;
+        font-size: 24px;
+        line-height: 1.2;
+      }
+      .hp-stat span {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      /* ---------- Section headings ---------- */
+      .hp-head {
+        margin: 26px 0 12px;
+      }
+      .hp-head h2 {
+        font-size: 18px;
+        margin: 0 0 4px;
+      }
+      .hp-head p {
+        margin: 0;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      /* ---------- Workflow steps ---------- */
+      .hp-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+      }
+      .hp-step {
+        display: block;
+        margin: 0;
+      }
+      .hp-num {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        font-size: 14px;
+        font-weight: bold;
+        margin-bottom: 12px;
+      }
+      .hp-step b {
+        display: block;
+        font-size: 15px;
+        margin-bottom: 5px;
+      }
+      .hp-step span {
+        display: block;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+
+      .hp-map-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .hp-map-top p {
+        margin: 3px 0 0;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .hp-search {
+        width: 230px;
+        max-width: 100%;
+        padding: 9px 12px;
+        font-size: 13px;
+        border: 1px solid #d6e5f2;
+        border-radius: 10px;
+        background: transparent;
+        color: inherit;
+      }
+      body.dark .hp-search {
+        border-color: #2b405a;
+      }
+      .hp-chips {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+      }
+      .hp-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 12px;
+        border: 1px solid #d6e5f2;
+        border-radius: 20px;
+        background: transparent;
+        color: inherit;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      body.dark .hp-chip {
+        border-color: #2b405a;
+      }
+      .hp-chip i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+      .hp-chip[aria-pressed="false"] {
+        opacity: 0.45;
+      }
+      .hp-map {
+        height: 470px;
+        border-radius: 11px;
+        overflow: hidden;
+      }
+      .hp-pop b {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+      .hp-pop small {
+        display: block;
+        color: #6680a7;
+        margin-bottom: 8px;
+      }
+      .hp-pop a {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #1687ee;
+        color: #fff !important;
+        font-size: 12px;
+        text-decoration: none;
+      }
+
+      /* ---------- Be prepared strip (last block on the page) ----------
+         Red theme. The colours are variables, so light and dark mode only
+         have to swap the values below; the rules underneath never change. */
+      .hp-prep {
+        --prep-bg: #fff4f4;
+        --prep-border: #f3b8b8;
+        --prep-accent: #d92d34;
+        --prep-title: #c0262d;
+        --prep-tip: #7a1f24;
+        --prep-text: #6e4044;
+        --prep-chip-bg: #fde2e2;
+        --prep-chip-text: #7a3b3f;
+      }
+      body.dark .hp-prep {
+        --prep-bg: #2a1719;
+        --prep-border: #7a2f35;
+        --prep-accent: #ff6b6b;
+        --prep-title: #ff8d8d;
+        --prep-tip: #ffd0d0;
+        --prep-text: #e6c3c5;
+        --prep-chip-bg: #3b1e22;
+        --prep-chip-text: #e6c3c5;
+      }
+      /* ".hp .panel.hp-prep" is more specific than the shared ".panel" and
+         "body.dark .panel" rules in style.css, so the red background wins. */
+      .hp .panel.hp-prep {
+        margin: 26px 0 0;
+        background: var(--prep-bg);
+        border-color: var(--prep-border);
+        border-left: 5px solid var(--prep-accent);
+        box-shadow: none;
+      }
+      body.dark .hp .panel.hp-prep {
+        background: var(--prep-bg);
+        border-color: var(--prep-border);
+        border-left-color: var(--prep-accent);
+      }
+      .hp-prep h3 {
+        margin-bottom: 14px;
+        color: var(--prep-title);
+      }
+      .hp-prep-body {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr) auto;
+        gap: 22px;
+        align-items: start;
+      }
+      .hp-tip b {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 4px;
+        color: var(--prep-tip);
+      }
+      .hp-tip span {
+        display: block;
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--prep-text);
+      }
+      .hp-call {
+        display: flex;
+        gap: 10px;
+      }
+      .hp-call div {
+        min-width: 112px;
+        padding: 10px 14px;
+        border-radius: 10px;
+        background: var(--prep-chip-bg);
+        text-align: center;
+        font-size: 11px;
+        color: var(--prep-chip-text);
+      }
+      .hp-call b {
+        display: block;
+        font-size: 20px;
+        color: var(--prep-title);
+      }
+
+      /* ---------- Keyboard focus ---------- */
+      .hp a:focus-visible,
+      .hp button:focus-visible,
+      .hp input:focus-visible {
+        outline: 3px solid #1687ee66;
+        outline-offset: 2px;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .hp * {
+          transition: none !important;
+        }
+      }
+
+      /* ---------- Responsive ---------- */
+      @media (max-width: 1100px) {
+        .hp-steps {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hp-prep-body {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .hp-call {
+          grid-column: 1 / -1;
+        }
+      }
+      @media (max-width: 750px) {
+        .hp-steps,
+        .hp-stats,
+        .hp-prep-body {
+          grid-template-columns: 1fr;
+        }
+        .hp-stat {
+          border-left: 0;
+          border-top: 1px solid var(--line);
+        }
+        .hp-stat:first-child {
+          border-top: 0;
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -32,43 +366,13 @@
 
       <nav>
         <a href="index.html" data-p="home">
-          ⌂
-          <span>
-            Home
-            <small>Overview & Insights</small>
-          </span>
+          ⌂ <span>Home<small>Overview & Insights</small></span>
         </a>
-
         <a href="simulation.html" data-p="simulation">
-          ≋
-          <span>
-            Simulation
-            <small>Regions · Rivers · Dams</small>
-          </span>
+          ≋ <span>Simulation<small>Regions · Rivers · Dams</small></span>
         </a>
-
         <a href="live-monitor.html" data-p="live">
-          ◉
-          <span>
-            Live Flood Monitor
-            <small>Real-time Satellite Data</small>
-          </span>
-        </a>
-
-        <a href="analysis.html" data-p="analysis">
-          ▥
-          <span>
-            Flood Analysis
-            <small>Depth · Velocity · Impact</small>
-          </span>
-        </a>
-
-        <a href="reports.html" data-p="reports">
-          ▣
-          <span>
-            Reports & Export
-            <small>Maps · Data · Reports</small>
-          </span>
+          ◉ <span>Live Flood Monitor<small>Real-time Satellite Data</small></span>
         </a>
       </nav>
 
@@ -81,7 +385,7 @@
     </aside>
 
     <main>
-      <section class="content" data-page="home">
+      <section class="content hp" data-page="home">
         <!-- Welcome -->
         <div class="welcome">
           <div>
@@ -92,38 +396,134 @@
               communities.
             </p>
           </div>
+
+          <div class="hp-actions">
+            <a class="hp-btn primary" href="simulation.html"
+              >Run a simulation</a
+            >
+            <a class="hp-btn ghost" href="live-monitor.html"
+              >Open live monitor</a
+            >
+          </div>
         </div>
 
-        <!-- Main Dashboard -->
-        <div class="homegrid">
-          <!-- Flood Situation Map -->
-          <div class="panel">
-            <div class="ph">
-              <h3>Flood Situation Across India</h3>
-              <span class="live">● Live</span>
+        <!-- Facts strip -->
+        <div class="panel hp-stats">
+          <div class="hp-stat">
+            <b id="statDams">38</b>
+            <span>dams and lakes you can simulate</span>
+          </div>
+          <div class="hp-stat">
+            <b>4 regions</b>
+            <span>covered, from Kashmir to Kerala</span>
+          </div>
+          <div class="hp-stat">
+            <b>Sentinel-1</b>
+            <span>radar imagery behind the Live Monitor</span>
+          </div>
+        </div>
+
+        <!-- How it works -->
+        <div class="hp-head" style="margin-top: 8px">
+          <h2>How Suraksha-Setu works</h2>
+          <p>Four steps from choosing a dam to sharing a report.</p>
+        </div>
+
+        <div class="hp-steps">
+          <div class="panel hp-step">
+            <div class="hp-num">1</div>
+            <b>Set up and run</b>
+            <span
+              >Pick a dam or enter coordinates, choose a scenario and start the
+              simulation.</span
+            >
+          </div>
+          <div class="panel hp-step">
+            <div class="hp-num">2</div>
+            <b>Watch the flood spread</b>
+            <span
+              >See the flood move across the map and step through the first
+              hours.</span
+            >
+          </div>
+          <div class="panel hp-step">
+            <div class="hp-num">3</div>
+            <b>Analyze the impact</b>
+            <span
+              >Check depth, velocity, and the people and structures at
+              risk.</span
+            >
+          </div>
+          <div class="panel hp-step">
+            <div class="hp-num">4</div>
+            <b>Export and share</b>
+            <span>Download maps and data to share with your team.</span>
+          </div>
+        </div>
+
+        <!-- Map + side column -->
+        <div class="hp-head">
+          <h2>Where you can simulate</h2>
+          <p>Every dam and lake in the library, grouped by region.</p>
+        </div>
+
+        <div class="panel">
+          <div class="hp-map-top">
+            <div>
+              <h3>Dam library</h3>
+              <p>Click a marker to start a simulation for that dam.</p>
             </div>
 
-            <div id="indiaMap" class="map"></div>
+            <input
+              id="damSearch"
+              class="hp-search"
+              list="damList"
+              type="search"
+              placeholder="Find a dam..."
+              aria-label="Find a dam"
+              autocomplete="off"
+            />
+            <datalist id="damList"></datalist>
           </div>
 
-          <!-- Right Side Panels -->
-          <div class="stack">
-            <!-- Live Flood Alerts -->
-            <div class="panel">
-              <div class="ph">
-                <h3>Live Flood Alerts</h3>
-                <a href="live-monitor.html">View All</a>
-              </div>
+          <div id="regionChips" class="hp-chips"></div>
 
-              <p>
-                <b class="high">High Risk</b>
-                Brahmaputra Basin, Assam
-              </p>
+          <div id="damMap" class="hp-map"></div>
+        </div>
 
-              <p>
-                <b class="elev">Elevated</b>
-                Kosi River, Bihar
-              </p>
+        <!-- Be prepared: single horizontal strip at the very bottom -->
+        <div class="panel hp-prep">
+          <h3>Be prepared</h3>
+
+          <div class="hp-prep-body">
+            <div class="hp-tip">
+              <b>Know your area</b>
+              <span
+                >Find out if your home is low-lying or close to a river or
+                dam.</span
+              >
+            </div>
+            <div class="hp-tip">
+              <b>Pack a go-bag</b>
+              <span
+                >Keep documents, medicines, a torch and drinking water in one
+                bag.</span
+              >
+            </div>
+            <div class="hp-tip">
+              <b>Move early</b>
+              <span
+                >When a warning comes, go to higher ground. Do not wait.</span
+              >
+            </div>
+            <div class="hp-tip">
+              <b>Stay out of flood water</b>
+              <span>Never walk or drive through it.</span>
+            </div>
+
+            <div class="hp-call">
+              <div><b>112</b>Emergency</div>
+              <div><b>1078</b>Disaster helpline</div>
             </div>
           </div>
         </div>
