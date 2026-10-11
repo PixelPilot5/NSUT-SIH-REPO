@@ -1,131 +1,69 @@
 # Architecture
 
-## 1. System Overview
+Suraksha-Setu is a browser app with a Python (FastAPI) backend. The browser never waits on one long request: a simulation runs as a background job and the page polls its progress.
 
-FLOODSIM is a modular flood-simulation and decision-support platform. The system connects a web interface, geospatial processing, backend services, hydrodynamic simulation, near-real-time remote sensing, and impact analysis.
-
-```text
-                         ┌─────────────────────┐
-                         │       User          │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   Web Frontend      │
-                         │ Next.js / React     │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │ Backend / API       │
-                         │ FastAPI             │
-                         └──────┬────────┬─────┘
-                                │        │
-                    ┌───────────┘        └──────────────┐
-                    ▼                                   ▼
-          ┌──────────────────┐                 ┌──────────────────┐
-          │ PostgreSQL +     │                 │ Simulation /     │
-          │ PostGIS          │                 │ Data Services    │
-          └──────────────────┘                 └───────┬──────────┘
-                                                       │
-                              ┌────────────────────────┼────────────────────┐
-                              ▼                        ▼                    ▼
-                    ┌─────────────────┐      ┌─────────────────┐  ┌─────────────────┐
-                    │ SPH / Delft3D  │      │ Google Earth    │  │ Impact Analysis │
-                    │ Simulation      │      │ Engine /        │  │                 │
-                    │                 │      │ Remote Sensing  │  │                 │
-                    └────────┬────────┘      └────────┬────────┘  └────────┬────────┘
-                             │                        │                    │
-                             └────────────────────────┼────────────────────┘
-                                                      ▼
-                                             ┌─────────────────┐
-                                             │ GIS / Results   │
-                                             │ Processing      │
-                                             └────────┬────────┘
-                                                      │
-                                                      ▼
-                                             ┌─────────────────┐
-                                             │ Maps, Analysis, │
-                                             │ Comparison &    │
-                                             │ Reports         │
-                                             └─────────────────┘
-```
-
-## 2. Core Components
-
-### Frontend
-- Next.js / React
-- Provides navigation, scenario configuration, simulation status, results, impact analysis, live monitoring, comparison, and reports.
-- Displays GIS outputs and communicates with the backend through APIs.
-
-### Backend
-- FastAPI with Python.
-- Provides APIs for study areas, datasets, simulations, results, impact analysis, users, and reports.
-- Coordinates requests between the frontend, database, processing services, and simulation pipeline.
-
-### Database
-- PostgreSQL with PostGIS.
-- Stores application data and geospatial entities such as rivers, dams, study areas, datasets, simulations, and impact results.
-
-### GIS / Geospatial Processing
-- MapLibre GL JS or Leaflet for map visualization.
-- GeoJSON for vector exchange.
-- GeoPandas, Shapely, Rasterio, GDAL, and PyProj for geospatial processing.
-- Consumes simulation outputs such as flood extent, depth, velocity, arrival time, and water level.
-
-### Hydrodynamic Simulation
-- Uses the project's SPH and/or Delft3D modelling workflow.
-- Inputs can include DEM, river/dam information, hydrological data, initial water conditions, discharge, breach parameters, and simulation configuration.
-- Produces flood-related spatial outputs for downstream GIS visualization and analysis.
-
-### Near-Real-Time Monitoring
-- Google Earth Engine processes open remote-sensing data such as Sentinel and Landsat imagery.
-- Supports water/flood detection, change detection, and flood-extent generation.
-- Results are passed to the backend and presented through the live-monitoring interface.
-
-### Impact Analysis
-- Overlays flood/simulation results with exposure layers.
-- Can analyse affected population, buildings, roads, bridges, hospitals, schools, and agricultural areas.
-- Uses GeoPandas, PostGIS, Shapely, Rasterio, Pandas, and NumPy.
-
-## 3. Data Flow
+## 1. System overview
 
 ```text
-Study Area / Data
-       │
-       ▼
-Scenario Configuration
-       │
-       ▼
-Backend
-       │
-       ▼
-Pre-processing
-       │
-       ├──────────────► SPH / Delft3D ──────► Simulation Results
-       │
-       └──────────────► GEE / Remote Sensing ─► Flood Monitoring
-
-Simulation / Monitoring Results
-       │
-       ▼
-GIS Processing
-       │
-       ▼
-Impact Analysis
-       │
-       ▼
-Frontend
-       │
-       ├── Flood Maps
-       ├── Depth / Velocity / Arrival Time
-       ├── Impact Statistics
-       ├── Comparison
-       └── Reports / Export
+ Browser (HTML / CSS / JavaScript, Bootstrap, Leaflet)
+ ├─ Home, Simulation, Results, Impact Analysis, Reports, Live Flood Monitor
+ │
+ │  REST / JSON
+ ▼
+ FastAPI backend  (src/backend/main.py)
+ ├─ /api/dams, /api/scenarios      dam catalogue and breach scenarios
+ ├─ /api/jobs                      start a simulation, poll status, fetch result
+ └─ /api/live-monitor              Sentinel-1 flood metrics for a basin
+        │                                   │
+        ▼                                   ▼
+ jobs.py  (background job queue)     Google Earth Engine
+        │                            (Sentinel-1 SAR change detection)
+        ▼
+ solvers.py  (orchestration + on-disk cache in backend/cache/)
+        │
+        ├─ dam_data.py   real dam parameters and sources
+        ├─ breach.py     breach hydrograph: weir equation + Froehlich 2008 breach width and time
+        ├─ terrain.py    valley grid along the river centre-line, shared by both solvers
+        ├─ sph2d.py      depth-integrated SPH solver
+        └─ swe2d.py      2D shallow-water finite-volume solver on a curvilinear grid (Delft3D-type)
 ```
 
-## 4. Key Design Principle
+## 2. Components
 
-The architecture is divided by technical responsibility rather than by individual pages. The backend acts as the integration layer, while GIS provides a common spatial representation for simulation, monitoring, and impact results.
+**Frontend** (`src/frontend`): static pages with no build step. It stores the running job and its result in the browser (`localStorage`), draws the flood on a Leaflet map, and builds the impact analysis and every export in the browser.
 
-Integration should be validated incrementally: first frontend–API–database, then study-area mapping, mock simulation results, real simulation output, impact analysis, and finally near-real-time GEE integration.
+**Backend** (`src/backend`): FastAPI. `main.py` exposes the API. `jobs.py` runs each simulation in a worker thread and shares one job between identical requests. `solvers.py` connects the API to the physics and caches finished runs on disk, so preset cases open instantly.
+
+**Hydrodynamic models**: both models get the same dam, scenario, terrain grid and source hydrograph, so any difference between them comes from the numerical method.
+
+- SPH: each particle carries a fixed water volume, and depth comes from kernel summation.
+- Delft3D-type grid solver: depth-averaged shallow-water equations, finite-volume HLL scheme, on a curvilinear valley grid. It is our own implementation of the same physics, not the Delft3D program.
+
+**Impact analysis** (`frontend/js/exposure.js`, `analysis.js`): combines the simulated flood extent with Census 2011 population density to estimate people, buildings, roads, bridges, schools and health facilities, and cropland. Results are rounded ranges, not survey counts.
+
+**Reports** (`frontend/js/reports.js`): PDF (print view), Excel (.xlsx), GeoJSON and KML, all built in the browser from the same result that the analysis page shows.
+
+**Live Flood Monitor**: the map is our published Google Earth Engine app, embedded in the page. The backend computes the flooded area from Sentinel-1 radar and derives the other impact figures from it. If Earth Engine is not authenticated on the machine running the backend, it falls back to saved or reference values instead of failing.
+
+## 3. Data flow
+
+```text
+Choose dam or custom point  ->  choose scenario  ->  POST /api/jobs
+        |
+        v
+breach hydrograph (breach.py)  ->  terrain grid (terrain.py)
+        |
+        +--> SPH (sph2d.py)  ------+
+        |                          +--> result JSON (cached) --> browser
+        +--> grid solver (swe2d.py)+
+                                          |
+                                          v
+        flood map, depth and speed, arrival times, impact analysis, reports
+```
+
+## 4. Design choices
+
+- One shared hydrograph and terrain for both solvers, so the two models can be compared fairly.
+- Background jobs plus an on-disk cache, so the demo stays responsive.
+- No database and no build step: the app runs with `python server.py` and a static file server.
+- Custom coordinates use assumed default dam parameters, and the results page labels them as assumed.
