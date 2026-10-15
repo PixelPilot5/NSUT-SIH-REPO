@@ -136,8 +136,6 @@ If you are already inside `src/backend` from the Installation step, just run `py
 
 **Frontend:** open the `src/frontend` folder in VS Code, install the **Live Server** extension, right-click `index.html` and choose **Open with Live Server**. Keep the backend running.
 
-Preset-dam results are pre-computed in `src/backend/cache/`, so they open instantly. A new case is computed on its first run and then cached.
-
 **Live Flood Monitor (optional, needs Earth Engine).** The map is our published Earth Engine app and works for everyone. The six impact figures below it are computed through Earth Engine, which needs your own login. Without it, the backend falls back to saved or reference values instead of failing, so those figures are not live. For live figures, register for free (non-commercial) at https://code.earthengine.google.com/register, then, inside `src/backend`:
 
 ```bash

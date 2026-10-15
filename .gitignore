@@ -1,0 +1,55 @@
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+
+# ---------- Virtual environments ----------
+venv/
+.venv/
+env/
+ENV/
+
+# ---------- Secrets and credentials ----------
+.env
+.env.*
+*.pem
+*.key
+*service-account*.json
+*credentials*.json
+client_secret*.json
+.config/earthengine/
+
+# ---------- Large terrain files ----------
+src/backend/dem/*.tif
+src/backend/dem/*.tiff
+
+# ---------- Node / frontend tooling ----------
+node_modules/
+npm-debug.log*
+.parcel-cache/
+
+# ---------- Logs and temporary files ----------
+*.log
+*.tmp
+*.bak
+*.swp
+.cache/
+
+# ---------- Editor and OS files ----------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- Local exports from the Reports page ----------
+suraksha_setu_*.xlsx
+suraksha_setu_*.geojson
+suraksha_setu_*.kml
+suraksha_setu_*.csv
