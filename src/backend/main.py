@@ -1,3 +1,7 @@
+import datetime
+import hashlib
+import json
+import os
 from typing import Optional, Dict, Any
 from fastapi import FastAPI, Depends, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,13 +37,17 @@ except ImportError:                              # Earth Engine is optional for 
 # ---------------------------------------------------------
 # INITIALIZE GOOGLE EARTH ENGINE SDK
 # ---------------------------------------------------------
+GEE_READY = False
 try:
     if ee is None:
         raise RuntimeError("earthengine-api is not installed")
-    ee.Initialize(project='gee-live-flood-monitoring')
+    # Judges use their own Earth Engine project: set the EE_PROJECT environment variable.
+    ee.Initialize(project=os.environ.get("EE_PROJECT", "gee-live-flood-monitoring"))
+    GEE_READY = True
     print("Google Earth Engine initialized successfully.")
 except Exception as e:
     print("GEE Initialization notice (Run `earthengine authenticate` if required):", e)
+    print("Live Flood Monitor will use the saved snapshot (backend/live_snapshot.json) instead.")
 
 
 # Creating app
@@ -112,7 +120,6 @@ DAM_LOCATIONS = {
 
 
 
-import hashlib
 
 # ---------------------------------------------------------
 # PRESET DAM METRICS METADATA BASELINES
@@ -169,38 +176,23 @@ def get_available_locations():
     """Returns the list of all available preset catchment basins."""
     return list(DAM_LOCATIONS.keys())
 
-@app.get("/api/live-monitor")
-def compute_live_gee_metrics(
-    location: str = Query(None, description="Preset Dam/River location name")
-):
-    """
-    Computes real-time flood analytics using Sentinel-1 SAR open-source imagery
-    via Google Earth Engine for preset locations.
-    """
-    geometry = None
-    center_coords = [20.5937, 78.9629]
-    zoom_level = 10
+SNAPSHOT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "live_snapshot.json")
 
-    if location and location in DAM_LOCATIONS:
-        loc_data = DAM_LOCATIONS[location]
-        center_coords = loc_data['center']
-        zoom_level = loc_data['zoom']
-    else:
-        return {
-            "location": location or "Unknown Location",
-            "center": center_coords,
-            "zoom": zoom_level,
-            "metrics": {
-                "inundation_area": "N/A",
-                "exposed_population": "N/A",
-                "submerged_cropland": "N/A",
-                "submerged_roads": "N/A",
-                "agricultural_loss": "N/A",
-                "critical_infrastructure": "N/A"
-            }
-        }
 
-    inundation = None
+def _load_snapshot():
+    """Saved real Earth Engine run (made with make_live_snapshot.py). Empty dict if the file is missing."""
+    try:
+        with open(SNAPSHOT_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _gee_flooded_area(loc_data):
+    """Sentinel-1 flooded area (km2) for a location box, or None when Earth Engine is not usable
+    or no flood signal is found."""
+    if not GEE_READY:
+        return None
     try:
         geometry = ee.Geometry.Rectangle(loc_data['bbox'])
         s1 = (
@@ -210,7 +202,6 @@ def compute_live_gee_metrics(
             .filter(ee.Filter.eq("instrumentMode", "IW"))
             .select("VV")
         )
-
 
         # Using valid recent Sentinel-1 observation windows (2024 monsoon season)
         pre_flood = s1.filterDate("2024-05-01", "2024-06-30").mosaic()
@@ -232,42 +223,94 @@ def compute_live_gee_metrics(
         if stats:
             calc_val = list(stats.values())[0]
             if calc_val is not None and calc_val > 0:
-                inundation = round(float(calc_val), 2)
+                return round(float(calc_val), 2)
     except Exception as e:
         print("Sentinel-1 GEE computation warning:", e)
+    return None
 
-    # Use deterministic baseline configuration if GEE is offline or zero
+
+def _metrics_from_area(location, inundation):
+    """The six dashboard parameters. Only the flooded area is satellite-measured; the other five are
+    screening estimates derived from it with per-basin ratios."""
     if location in DAM_METRICS_BASELINES:
         base = DAM_METRICS_BASELINES[location]
-        inundation = inundation or base['inundation']
         population = int(inundation * base['pop_factor'])
         cropland = round(inundation * base['cropland_ratio'], 1)
         roads = round(inundation * base['road_ratio'], 1)
         loss = round(inundation * base['loss_ratio'], 2)
         infra = int(inundation * base['infra_factor'])
     else:
-        # Stable deterministic hashing per location name (avoids random jump across Python reloads)
-        seed_hash = int(hashlib.md5(location.encode('utf-8')).hexdigest(), 16)
-        inundation = inundation or round(35.0 + (seed_hash % 12000) / 100.0, 2)
         population = int(inundation * 620 + 4500)
         cropland = round(inundation * 45.0, 1)
         roads = round(inundation * 0.68, 1)
         loss = round(inundation * 1.25, 2)
         infra = int(inundation * 9 + 400)
-
     return {
-        "location": location,
-        "center": center_coords,
-        "zoom": zoom_level,
-        "metrics": {
-            "inundation_area": f"{inundation:,.1f} km²",
-            "exposed_population": f"{population:,} People",
-            "submerged_cropland": f"{cropland:,.1f} Hectares",
-            "submerged_roads": f"{roads:,.1f} km",
-            "agricultural_loss": f"₹ {loss:,.2f} Cr",
-            "critical_infrastructure": f"{infra:,} Structures"
-        }
+        "inundation_area": f"{inundation:,.1f} km²",
+        "exposed_population": f"{population:,} People",
+        "submerged_cropland": f"{cropland:,.1f} Hectares",
+        "submerged_roads": f"{roads:,.1f} km",
+        "agricultural_loss": f"₹ {loss:,.2f} Cr",
+        "critical_infrastructure": f"{infra:,} Structures"
     }
+
+
+def _reference_area(location):
+    """Typical flooded area used only when neither live data nor a snapshot exists."""
+    if location in DAM_METRICS_BASELINES:
+        return DAM_METRICS_BASELINES[location]['inundation']
+    seed_hash = int(hashlib.md5(location.encode('utf-8')).hexdigest(), 16)
+    return round(35.0 + (seed_hash % 12000) / 100.0, 2)
+
+
+@app.get("/api/live-monitor")
+def compute_live_gee_metrics(
+    location: str = Query(None, description="Preset Dam/River location name")
+):
+    """
+    Flood analytics for preset locations from Sentinel-1 SAR (Google Earth Engine).
+    The response says where the numbers came from (`source`):
+      live       computed just now through Earth Engine
+      snapshot   saved real run from backend/live_snapshot.json (Earth Engine not available here)
+      reference  neither available: typical values for the basin, clearly not a measurement
+    """
+    center_coords = [20.5937, 78.9629]
+    zoom_level = 10
+
+    if not (location and location in DAM_LOCATIONS):
+        return {
+            "location": location or "Unknown Location",
+            "center": center_coords,
+            "zoom": zoom_level,
+            "source": "unavailable",
+            "gee_ready": GEE_READY,
+            "metrics": {
+                "inundation_area": "N/A",
+                "exposed_population": "N/A",
+                "submerged_cropland": "N/A",
+                "submerged_roads": "N/A",
+                "agricultural_loss": "N/A",
+                "critical_infrastructure": "N/A"
+            }
+        }
+
+    loc_data = DAM_LOCATIONS[location]
+    out = {"location": location, "center": loc_data['center'], "zoom": loc_data['zoom'],
+           "gee_ready": GEE_READY}
+
+    area = _gee_flooded_area(loc_data)
+    if area is not None:
+        out.update(source="live", metrics=_metrics_from_area(location, area))
+        return out
+
+    snap = _load_snapshot()
+    entry = (snap.get("locations") or {}).get(location)
+    if entry:
+        out.update(source="snapshot", snapshot_date=snap.get("generated_at"), metrics=entry["metrics"])
+        return out
+
+    out.update(source="reference", metrics=_metrics_from_area(location, _reference_area(location)))
+    return out
 
 # ---------------------------------------------------------
 # DAM CATALOGUE + LOCATION (real parameters live in dam_data.py)

@@ -212,8 +212,9 @@ class SPH2D:
                 pi_ = np.where(vr < 0, -self.alpha * cbar * mu / np.maximum(hbar, 1e-3), 0.0)
                 coef = -V * (G + pi_)
                 fx = coef * gx; fy = coef * gy
-                ax = np.bincount(ii, fx, na) - np.bincount(jj, fx, na)
-                ay = np.bincount(ii, fy, na) - np.bincount(jj, fy, na)
+                # float64 even when this group has no neighbour pairs (numpy returns int64 for empty weights)
+                ax = (np.bincount(ii, fx, na) - np.bincount(jj, fx, na)).astype(np.float64)
+                ay = (np.bincount(ii, fy, na) - np.bincount(jj, fy, na)).astype(np.float64)
                 # XSPH velocity correction
                 wx = V / np.maximum(hbar, 1e-3) * W
                 xs = -self.xsph * (np.bincount(ii, wx * vx_ij, na) - np.bincount(jj, wx * vx_ij, na))
