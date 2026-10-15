@@ -4,7 +4,7 @@
 
 | Field | Details |
 |---|---|
-| **Project name** | Suraksha-Setu (FloodSim): Smart Flood Intelligence |
+| **Project name** | Suraksha-Setu : Smart Flood Intelligence |
 | **Team name** | Unexpected Error :( |
 | **Problem statement ID** | SIH26161 |
 | **Problem statement title** | Dam Break Inundation Modelling Using Hydrodynamic Modelling of any River |
@@ -53,6 +53,7 @@ Suraksha-Setu is a web platform that simulates a dam-break flood for real Indian
 
 See [docs/architecture.md](docs/architecture.md).
 
+Architecture in short:
 ```text
 User
   ↓
@@ -124,7 +125,7 @@ pip install -r requirements.txt
 
 ## 12. Run
 
-**Backend** (run from the repository root)
+**Backend** (run from the repository root):
 
 ```bash
 cd src/backend
